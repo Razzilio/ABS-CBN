@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Banking System</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: auto;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      background: #28a745;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #218838;
+    }
+
+    .withdraw-btn {
+      background: #dc3545;
+    }
+
+    .withdraw-btn:hover {
+      background: #c82333;
+    }
+
+    .result {
+      margin-top: 10px;
+      padding: 10px;
+      background: #f1f1f1;
+      border-radius: 5px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>FastAPI Banking System</h1>
+
+    <!-- CREATE ACCOUNT -->
+    <div class="card">
+      <h2>Create Account</h2>
+
+      <input type="text" id="createName" placeholder="Enter Name" />
+      <input type="number" id="createBalance" placeholder="Enter Initial Balance" />
+
+      <button onclick="createAccount()">Create Account</button>
+
+      <div class="result" id="createResult"></div>
+    </div>
+
+    <!-- DEPOSIT -->
+    <div class="card">
+      <h2>Deposit Money</h2>
+
+      <input type="number" id="depositId" placeholder="Account ID" />
+      <input type="number" id="depositAmount" placeholder="Amount" />
+
+      <button onclick="depositMoney()">Deposit</button>
+
+      <div class="result" id="depositResult"></div>
+    </div>
+
+    <!-- WITHDRAW -->
+    <div class="card">
+      <h2>Withdraw Money</h2>
+
+      <input type="number" id="withdrawId" placeholder="Account ID" />
+      <input type="number" id="withdrawAmount" placeholder="Amount" />
+
+      <button class="withdraw-btn" onclick="withdrawMoney()">Withdraw</button>
+
+      <div class="result" id="withdrawResult"></div>
+    </div>
+
+    <!-- VIEW ACCOUNTS -->
+    <div class="card">
+      <h2>All Accounts</h2>
+
+      <button onclick="loadAccounts()">Load Accounts</button>
+
+      <div class="result" id="accountsResult"></div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "http://127.0.0.1:8000";
+
+    async function handleResponse(response) {
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.detail || "Something went wrong");
+      }
+
+      return data;
+    }
+
+    // CREATE ACCOUNT
+    async function createAccount() {
+      try {
+        const name = document.getElementById("createName").value;
+        const balance = parseFloat(document.getElementById("createBalance").value);
+
+        const response = await fetch(`${API_URL}/accounts/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            name,
+            balance
+          })
+        });
+
+        const data = await handleResponse(response);
+
+        document.getElementById("createResult").innerText = JSON.stringify(data, null, 2);
+      } catch (error) {
+        document.getElementById("createResult").innerText = error.message;
+      }
+    }
+
+    // DEPOSIT
+    async function depositMoney() {
+      try {
+        const id = document.getElementById("depositId").value;
+        const amount = parseFloat(document.getElementById("depositAmount").value);
+
+        const response = await fetch(`${API_URL}/accounts/${id}/deposit`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            amount
+          })
+        });
+
+        const data = await handleResponse(response);
+
+        document.getElementById("depositResult").innerText = JSON.stringify(data, null, 2);
+      } catch (error) {
+        document.getElementById("depositResult").innerText = error.message;
+      }
+    }
+
+    // WITHDRAW
+    async function withdrawMoney() {
+      try {
+        const id = document.getElementById("withdrawId").value;
+        const amount = parseFloat(document.getElementById("withdrawAmount").value);
+
+        const response = await fetch(`${API_URL}/accounts/${id}/withdraw`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            amount
+          })
+        });
+
+        const data = await handleResponse(response);
+
+        document.getElementById("withdrawResult").innerText = JSON.stringify(data, null, 2);
+      } catch (error) {
+        document.getElementById("withdrawResult").innerText = error.message;
+      }
+    }
+
+    // LOAD ACCOUNTS
+    async function loadAccounts() {
+      try {
+        const response = await fetch(`${API_URL}/accounts/`);
+
+        const data = await handleResponse(response);
+
+        document.getElementById("accountsResult").innerText = JSON.stringify(data, null, 2);
+      } catch (error) {
+        document.getElementById("accountsResult").innerText = error.message;
+      }
+    }
+  </script>
+
+</body>
+</html>
